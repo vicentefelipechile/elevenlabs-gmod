@@ -119,13 +119,11 @@ function Elevenlabs.Request(ply, msg)
                     local FilePos = Elevenlabs.Cache[FileID .. "_pos"] + 1
                     Elevenlabs.Cache[FileID .. "_pos"] = FilePos
     
-                    Elevenlabs.WriteData(ply, false, FileID, FilePos, FileParts)
+                    Elevenlabs.WriteData(ply, false, FileID, FileContent, FilePos, FileParts)
                 end)
             else
-                Elevenlabs.WriteData(ply, true, FileID)
+                Elevenlabs.WriteData(ply, true, FileID, FileContent)
             end
-
-
 
         end,
         failed      = function(err)
