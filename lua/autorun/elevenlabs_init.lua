@@ -12,6 +12,7 @@ Elevenlabs.Name = "Elevenlabs"
 
 function Elevenlabs.AddFile(path)
     local prefix = path:sub(1,3)
+    path = "elevenlabs/" .. path
 
     if prefix == "sv_" then
         if SERVER then
@@ -36,6 +37,6 @@ function Elevenlabs.AddFile(path)
     end
 end
 
-Elevenlabs.AddFile("elevenlabs/sh_main.lua")
-Elevenlabs.AddFile("elevenlabs/cl_main.lua")
-Elevenlabs.AddFile("elevenlabs/sv_main.lua")
+Elevenlabs.AddFile("sh_main.lua")
+Elevenlabs.AddFile("cl_main.lua")
+Elevenlabs.AddFile("sv_main.lua")
