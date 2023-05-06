@@ -18,22 +18,22 @@ function Elevenlabs.AddFile(path)
         if SERVER then
             include(path)
 
-            MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded:         ", COLOR_STATE, path)
+            MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded: ", COLOR_STATE, path)
         end
     elseif prefix == "cl_" then
         if SERVER then
             AddCSLuaFile(path)
-            MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Send to Client: ", COLOR_STATE, path)
+            --MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Sended: ", COLOR_STATE, path)
         elseif CLIENT then
             include(path)
-            MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded:         ", COLOR_STATE, path)
+            MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded: ", COLOR_STATE, path)
         end
     elseif prefix == "sh_" then
         if SERVER then
             AddCSLuaFile(path)
         end
         include(path)
-        MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded:         ", COLOR_STATE, path)
+        MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded: ", COLOR_STATE, path)
     end
 
     MsgC("\n")
