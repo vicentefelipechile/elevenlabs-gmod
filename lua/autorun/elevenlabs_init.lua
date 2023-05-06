@@ -23,7 +23,7 @@ function Elevenlabs.AddFile(path)
     elseif prefix == "cl_" then
         if SERVER then
             AddCSLuaFile(path)
-            --MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Sended: ", COLOR_STATE, path)
+            MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Sended: ", COLOR_STATE, path)
         elseif CLIENT then
             include(path)
             MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded: ", COLOR_STATE, path)
