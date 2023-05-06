@@ -82,50 +82,44 @@ function Elevenlabs.Request(ply, msg)
         headers     = headers,
         type        = "application/json",
         success     = function(code, body, header)
-            print(code)
-            print(body)
-            PrintTable(header)
 
-            if not code == 200 then
-                print(code)
-                PrintTable( util.JSONToTable(body) )
-                return
-            end
+            if code == 200 then
+
+                local FileContent = util.Compress( body )
+                local FileSize = #FileContent
+                local FileID = os.time()
+
+                if FileSize > FileMaxSize then
+                    local FileParts = math.ceil( FileSize, FileMaxSize )
+                    local FileTable = {}
+
+                    for i = 1, FileParts - 1 do
+                        local IndexStart = (i - 1) * FileMaxSize + 1
+                        local IndexEnd = i * FileMaxSize
+                        local FileData = string.sub(FileContent, IndexStart, IndexEnd)
+
+                        FileTable[i] = FileData
+                    end
+
+                    local IndexStart = (numParts - 1) * FileMaxSize + 1
+                    local FileData = string.sub(FileContent, IndexStart)
+                    FileTable[FileParts] = FileData
+
+                    Elevenlabs.Cache[FileID] = FileTable
+                    Elevenlabs.Cache[FileID .. "_pos"] = 0
 
 
-            local FileContent = util.Compress( body )
-            local FileSize = #FileContent
-            local FileID = os.time()
-
-            if FileSize > FileMaxSize then
-                local FileParts = math.ceil( FileSize, FileMaxSize )
-                local FileTable = {}
-
-                for i = 1, FileParts - 1 do
-                    local IndexStart = (i - 1) * FileMaxSize + 1
-                    local IndexEnd = i * FileMaxSize
-                    local FileData = string.sub(FileContent, IndexStart, IndexEnd)
-
-                    FileTable[i] = FileData
+                    timer.Create("elevenlabs_send_", 1000 / Elevenlabs.Config.Time:GetInt() or 20, #Elevenlabs.Cache[FileID], function()
+                        local FileID = FileID
+                        local FilePos = Elevenlabs.Cache[FileID .. "_pos"] + 1
+                        Elevenlabs.Cache[FileID .. "_pos"] = FilePos
+        
+                        Elevenlabs.WriteData(ply, false, FileID, FileContent, FilePos, FileParts)
+                    end)
+                else
+                    Elevenlabs.WriteData(ply, true, FileID, FileContent)
                 end
 
-                local IndexStart = (numParts - 1) * FileMaxSize + 1
-                local FileData = string.sub(FileContent, IndexStart)
-                FileTable[FileParts] = FileData
-
-                Elevenlabs.Cache[FileID] = FileTable
-                Elevenlabs.Cache[FileID .. "_pos"] = 0
-
-
-                timer.Create("elevenlabs_send_", 1000 / Elevenlabs.Config.Time:GetInt() or 20, #Elevenlabs.Cache[FileID], function()
-                    local FileID = FileID
-                    local FilePos = Elevenlabs.Cache[FileID .. "_pos"] + 1
-                    Elevenlabs.Cache[FileID .. "_pos"] = FilePos
-    
-                    Elevenlabs.WriteData(ply, false, FileID, FileContent, FilePos, FileParts)
-                end)
-            else
-                Elevenlabs.WriteData(ply, true, FileID, FileContent)
             end
 
         end,

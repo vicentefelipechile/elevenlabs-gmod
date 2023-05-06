@@ -11,7 +11,21 @@ CreateClientConVar("elevenlabs_voice", "josh", true, true, "What voice response 
 local g_sound
 function Elevenlabs.PlaySound(ply, path)
     sound.PlayFile("data/" .. path, "3d noplay", function(channel, errID, errStr)
-        
+        local soundID = os.time()
+        g_sound = nil
+
+        if IsValid(channel) then
+            g_sound = channel
+            g_sound:Play()
+
+            hook.Add("Think", "elevenlabs_" .. soundID, function()
+                g_sound:SetPos( ply:GetPos() )
+
+                if g_sound:GetState() == GMOD_CHANNEL_STOPPED then
+                    hook.Remove("Think", "elevenlabs_" .. soundID)
+                end
+            end)
+        end
     end)
 end
 
