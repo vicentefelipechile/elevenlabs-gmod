@@ -36,6 +36,18 @@ Elevenlabs.Config.Similarity = CreateConVar("elevenlabs_voice_similarity", 0.8, 
         Main Functions
 ------------------------]]--
 
+function Elevenlabs.GetPlayers()
+    local tbl = {}
+
+    for _, ply in ipairs(player.GetAll()) do
+        if ply:GetInfoNum("elevenlabs_download", 1) == 1 then
+            table.insert(tbl, ply)
+        end
+    end
+
+    return tbl
+end
+
 function Elevenlabs.WriteData(ply, IsOnePart, FileID, FileData, FileCurrentPart, FileLastPart)
     local FileSize = #FileData
 
@@ -61,7 +73,7 @@ function Elevenlabs.WriteData(ply, IsOnePart, FileID, FileData, FileCurrentPart,
 
         end
 
-    net.Broadcast()
+    net.Send( Elevenlabs.GetPlayers() )
 
 end
 

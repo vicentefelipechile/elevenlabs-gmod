@@ -3,6 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 CreateClientConVar("elevenlabs_voice", "josh", true, true, "What voice response the elevenlabs module?")
+CreateClientConVar("elevenlabs_download", 1, true, true, "Toggle to download voice files", 0, 1)
 
 --[[------------------------
         Main Functions
