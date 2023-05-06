@@ -101,7 +101,7 @@ function Elevenlabs.Request(ply, msg)
                         FileTable[i] = FileData
                     end
 
-                    local IndexStart = (numParts - 1) * FileMaxSize + 1
+                    local IndexStart = (FileParts - 1) * FileMaxSize + 1
                     local FileData = string.sub(FileContent, IndexStart)
                     FileTable[FileParts] = FileData
 
