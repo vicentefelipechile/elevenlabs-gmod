@@ -28,6 +28,9 @@ local voices = {
 
 Elevenlabs.Config.Key = CreateConVar("elevenlabs_key", "YOUR_API_KEY_HERE", {FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED, FCVAR_UNLOGGED}, "The key to use Elevenlabs")
 Elevenlabs.Config.Time = CreateConVar("elevenlabs_time", 20, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Time (in ms) between sending packets", 20, 1000)
+Elevenlabs.Config.Multilingual = CreateConVar("elevenlabs_voice_multilingual", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Toggle the multilingual system", 0, 1)
+Elevenlabs.Config.Stability = CreateConVar("elevenlabs_voice_stability", 0.2, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Voice Setting Stability", 0, 1)
+Elevenlabs.Config.Similarity = CreateConVar("elevenlabs_voice_similarity", 0.8, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Voice Setting Similarity", 0, 1)
 
 --[[------------------------
         Main Functions
@@ -73,12 +76,21 @@ function Elevenlabs.Request(ply, msg)
         ["xi-api-key"] = Elevenlabs.Config.Key:GetString()
     }
 
+    local body = {
+        text = msg,
+        model_id = Elevenlabs.Config.Multilingual:GetBool() and "eleven_multilingual_v1" or "eleven_monolingual_v1",
+        voice_settings = {
+            stability = Elevenlabs.Config.Stability:GetFloat(),
+            similarity_boost = Elevenlabs.Config.Similarity:GetFloat()
+        }
+    }
+
     local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], voice )
     
     HTTP({
         url         = url,
         method      = "POST",
-        body        = util.TableToJSON({ text = msg }),
+        body        = util.TableToJSON(body),
         headers     = headers,
         type        = "application/json",
         success     = function(code, body, header)
@@ -90,7 +102,7 @@ function Elevenlabs.Request(ply, msg)
                 local FileID = os.time()
 
                 if FileSize > FileMaxSize then
-                    local FileParts = math.ceil( FileSize, FileMaxSize )
+                    local FileParts = math.ceil( FileSize / FileMaxSize )
                     local FileTable = {}
 
                     for i = 1, FileParts - 1 do
@@ -109,12 +121,12 @@ function Elevenlabs.Request(ply, msg)
                     Elevenlabs.Cache[FileID .. "_pos"] = 0
 
 
-                    timer.Create("elevenlabs_send_", 1000 / Elevenlabs.Config.Time:GetInt() or 20, #Elevenlabs.Cache[FileID], function()
-                        local FileID = FileID
+                    timer.Create("elevenlabs_send_" .. FileID, 1 / Elevenlabs.Config.Time:GetInt() or 20, #Elevenlabs.Cache[FileID], function()
                         local FilePos = Elevenlabs.Cache[FileID .. "_pos"] + 1
                         Elevenlabs.Cache[FileID .. "_pos"] = FilePos
         
-                        Elevenlabs.WriteData(ply, false, FileID, FileContent, FilePos, FileParts)
+                        Elevenlabs.WriteData(ply, false, FileID, Elevenlabs.Cache[FileID][FilePos], FilePos, FileParts)
+                        print(ply, false, FileID, FilePos, FileParts)
                     end)
                 else
                     Elevenlabs.WriteData(ply, true, FileID, FileContent)
