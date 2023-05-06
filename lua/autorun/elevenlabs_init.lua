@@ -10,7 +10,7 @@ Elevenlabs.Name = "Elevenlabs"
         Functions
 ------------------------]]--
 
-Elevenlabs.AddFile(path)
+function Elevenlabs.AddFile(path)
     local prefix = path:sub(1,3)
 
     if prefix == "sv_" then
