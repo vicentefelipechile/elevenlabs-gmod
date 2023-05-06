@@ -43,7 +43,7 @@ function Elevenlabs.WriteData(ply, IsOnePart, FileID, FileData, FileCurrentPart,
     
         if IsOnePart then
 
-            net.WriteUInt(16)
+            net.WriteUInt(FileSize, 16)
             net.WriteData(FileData, FileSize)
 
         else
