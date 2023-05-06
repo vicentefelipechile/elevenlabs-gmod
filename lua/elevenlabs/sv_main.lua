@@ -65,7 +65,7 @@ end
 
 function Elevenlabs.Request(ply, msg)
 
-    local voice = voices[ ply:GetInfo("openai_elevenlabs_voice") ] or voice
+    local voice = voices[ ply:GetInfo("elevenlabs_voice") ] or voice
 
     local headers = {
         ["Accept"] = "audio/mpeg",

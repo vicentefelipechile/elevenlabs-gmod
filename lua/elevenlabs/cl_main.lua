@@ -2,7 +2,7 @@
                         Elevenlabs Client-side Script
 ----------------------------------------------------------------------------]]--
 
-CreateClientConVar("openai_elevenlabs_voice", "josh", true, true, "What voice response the elevenlabs module?")
+CreateClientConVar("elevenlabs_voice", "josh", true, true, "What voice response the elevenlabs module?")
 
 --[[------------------------
         Main Functions

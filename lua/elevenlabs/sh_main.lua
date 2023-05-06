@@ -9,8 +9,8 @@ Elevenlabs.Config = {}
 ------------------------]]--
 
 Elevenlabs.Config.enabled = CreateConVar("elevenlabs_enabled", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Toggle the elevenlabs module", 0, 1)
-Elevenlabs.Config.volume = CreateConVar("openai_elevenlabs_volume", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Volume of the voice from elevenlabs module", 0, 5)
-Elevenlabs.Config.display = CreateConVar("openai_elevenlabs_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+Elevenlabs.Config.volume = CreateConVar("elevenlabs_volume", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Volume of the voice from elevenlabs module", 0, 5)
+Elevenlabs.Config.display = CreateConVar("elevenlabs_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 
 --[[------------------------
