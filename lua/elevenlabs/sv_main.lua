@@ -26,7 +26,7 @@ local voices = {
      Private Definitions
 ------------------------]]--
 
-Elevenlabs.Config.Key = CreateConVar("elevenlabs_enabled", 1, {FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED, FCVAR_UNLOGGED}, "The key to use Elevenlabs", 0, 1)
+Elevenlabs.Config.Key = CreateConVar("elevenlabs_key", "YOUR_API_KEY_HERE", {FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED, FCVAR_UNLOGGED}, "The key to use Elevenlabs", 0, 1)
 Elevenlabs.Config.Time = CreateConVar("elevenlabs_time", 20, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Time (in ms) between sending packets", 20, 1000)
 
 --[[------------------------
