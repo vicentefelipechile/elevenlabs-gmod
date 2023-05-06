@@ -82,6 +82,9 @@ function Elevenlabs.Request(ply, msg)
         headers     = headers,
         type        = "application/json",
         success     = function(code, body, header)
+            print(code)
+            print(body)
+            PrintTable(header)
 
             if not code == 200 then
                 print(code)
