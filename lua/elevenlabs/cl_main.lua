@@ -63,4 +63,9 @@ function Elevenlabs.ReceiveData()
     g_file[FileID] = g_file[FileID] and g_file[FileID] .. FileData or FileData
 end
 
+
+--[[------------------------
+           Network
+------------------------]]--
+
 net.Receive("Elevenlabs.SVtoCL", Elevenlabs.ReceiveData)
