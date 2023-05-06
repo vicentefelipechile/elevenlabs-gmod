@@ -35,6 +35,8 @@ function Elevenlabs.AddFile(path)
         include(path)
         MsgC(COLOR_WHITE, "[", COLOR_BLUE, Elevenlabs.Name, COLOR_WHITE, "] ", "Loaded:         ", COLOR_STATE, path)
     end
+
+    MsgC("\n")
 end
 
 Elevenlabs.AddFile("sh_main.lua")
