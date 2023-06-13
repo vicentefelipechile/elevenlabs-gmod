@@ -51,7 +51,7 @@ end
 
 function Elevenlabs.IsBlacklistedPlayer(ply)
     -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L337-L345
-    name = string.format( "%s[%s]", ply:SteamID(),  )
+    name = string.format( "%s[%s]", ply:SteamID(), "ElevenlabsBlacklisted" )
 	local val = sql.QueryValue( "SELECT value FROM playerpdata WHERE infoid = " .. SQLStr( name ) .. " LIMIT 1" )
 
 	if ( val == nil ) then
