@@ -9,14 +9,14 @@ CreateClientConVar("elevenlabs_download", 1, true, true, "Toggle to download voi
         Main Functions
 ------------------------]]--
 
-function Elevenlabs.Request(cmd)
+function Elevenlabs.Request(msg)
 
     if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
         msg:sub(1,40)
     end
 
     net.Start("Elevenlabs.Command")
-        net.WriteString(cmd)
+        net.WriteString(msg)
     net.SendToServer()
 
 end

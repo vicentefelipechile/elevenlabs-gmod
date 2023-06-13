@@ -2,6 +2,8 @@
                         Elevenlabs Server-side Script
 ----------------------------------------------------------------------------]]--
 
+local stringStart = string.StartWith or string.StartsWith
+
 util.AddNetworkString("Elevenlabs.SVtoCL")
 util.AddNetworkString("Elevenlabs.Command")
 Elevenlabs.Cache = {}
@@ -202,7 +204,7 @@ end
 hook.Add("PlayerSay", "elevenlabssay", function(ply, text)
     if not Elevenlabs.Config.enabled:GetBool() then return end
 
-    if string.StartsWith(text, "!tts ") then
+    if stringStart(text, "!tts ") then
 
         if Elevenlabs.IsBlacklistedPlayer(ply) then
             ply:ChatPrint( Elevenlabs.Config.NotAllowedMsg:GetString() )
@@ -232,7 +234,7 @@ net.Receive("Elevenlabs.Command", Elevenlabs.PlayerCommand)
 ------------------------]]--
 
 concommand.Add("elevenlabs_blacklist", function(_, _, str)
-    if string.StartsWith(str, "7656") or string.StartsWith(str, "STEAM_") then
+    if stringStart(str, "7656") or stringStart(str, "STEAM_") then
         local ply = NULL
 
         ply = player.GetBySteamID(str)
@@ -243,7 +245,7 @@ concommand.Add("elevenlabs_blacklist", function(_, _, str)
 end)
 
 concommand.Add("elevenlabs_whitelist", function(_, _, str)
-    if string.StartsWith(str, "7656") or string.StartsWith(str, "STEAM_") then
+    if stringStart(str, "7656") or stringStart(str, "STEAM_") then
         local ply = NULL
 
         ply = player.GetBySteamID(str)
