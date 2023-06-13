@@ -9,6 +9,18 @@ CreateClientConVar("elevenlabs_download", 1, true, true, "Toggle to download voi
         Main Functions
 ------------------------]]--
 
+function Elevenlabs.Request(cmd)
+
+    if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
+        msg:sub(1,40)
+    end
+
+    net.Start("Elevenlabs.Command")
+        net.WriteString(cmd)
+    net.SendToServer()
+
+end
+
 local g_sound
 function Elevenlabs.PlaySound(ply, path)
     sound.PlayFile("data/" .. path, "3d noplay", function(channel, errID, errStr)
@@ -78,6 +90,14 @@ function Elevenlabs.ReceiveData()
     g_file[FileID] = g_file[FileID] and g_file[FileID] .. FileData or FileData
 end
 
+
+--[[------------------------
+           Command
+------------------------]]--
+
+concommand.Add("elevenlabs_makerequest", function(_, _, _, msg)
+    Elevenlabs.Request(msg)
+end)
 
 --[[------------------------
            Network

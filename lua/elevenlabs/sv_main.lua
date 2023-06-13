@@ -3,6 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("Elevenlabs.SVtoCL")
+util.AddNetworkString("Elevenlabs.Command")
 Elevenlabs.Cache = {}
 
 --[[------------------------
@@ -31,10 +32,34 @@ Elevenlabs.Config.Time = CreateConVar("elevenlabs_time", 20, {FCVAR_NOTIFY, FCVA
 Elevenlabs.Config.Multilingual = CreateConVar("elevenlabs_voice_multilingual", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Toggle the multilingual system", 0, 1)
 Elevenlabs.Config.Stability = CreateConVar("elevenlabs_voice_stability", 0.2, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Voice Setting Stability", 0, 1)
 Elevenlabs.Config.Similarity = CreateConVar("elevenlabs_voice_similarity", 0.8, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Voice Setting Similarity", 0, 1)
+Elevenlabs.Config.NotAllowedMsg = CreateConVar("elevenlabs_notallowed_msg", "You are not allowed to use Elevenlabs", {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What message will show to the player when isn't allowed to use Elevenlabs")
+Elevenlabs.Config.StringSafe = CreateConVar("elevenlabs_stringsafe", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Check and replace malicious string", 0, 1)
 
 --[[------------------------
         Main Functions
 ------------------------]]--
+
+function Elevenlabs.BlacklistPlayer(ply, allow)
+    if not IsEntity(ply) then return end
+    if not ply:IsPlayer() then return end
+    if not isbool(allow) then return end
+
+    -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L351-L356
+    local name = string.format( "%s[%s]", ply:SteamID(), "ElevenlabsBlacklisted" )
+    sql.Query( "REPLACE INTO playerpdata ( infoid, value ) VALUES ( " .. SQLStr( name ) .. ", " .. SQLStr( allow and "Allowed" or "NotAllowed" ) .. " )" )
+end
+
+function Elevenlabs.IsBlacklistedPlayer(ply)
+    -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L337-L345
+    name = string.format( "%s[%s]", ply:SteamID(),  )
+	local val = sql.QueryValue( "SELECT value FROM playerpdata WHERE infoid = " .. SQLStr( name ) .. " LIMIT 1" )
+
+	if ( val == nil ) then
+        return false
+    end
+
+	return val == "NotAllowed"
+end
 
 function Elevenlabs.GetPlayers()
     local tbl = {}
@@ -152,3 +177,78 @@ function Elevenlabs.Request(ply, msg)
         end
     })
 end
+
+function Elevenlabs.PlayerCommand(_, ply)
+    local msg = net.ReadString()
+
+    if Elevenlabs.IsBlacklistedPlayer(ply) then
+        ply:ChatPrint( Elevenlabs.Config.NotAllowedMsg:GetString() )
+        return not ( Elevenlabs.Config.display:GetBool() ) and text or ""
+    end
+
+    local msg = string.sub(text, 5)
+    if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
+        msg:sub(1,40)
+    end
+
+    msg = Elevenlabs.Config.StringSafe:GetBool() and Elevenlabs.SanitizeString(msg) or msg
+    Elevenlabs.Request(ply, msg)
+end
+
+--[[------------------------
+            Hook
+------------------------]]--
+
+hook.Add("PlayerSay", "elevenlabssay", function(ply, text)
+    if not Elevenlabs.Config.enabled:GetBool() then return end
+
+    if string.StartsWith(text, "!tts ") then
+
+        if Elevenlabs.IsBlacklistedPlayer(ply) then
+            ply:ChatPrint( Elevenlabs.Config.NotAllowedMsg:GetString() )
+            return not ( Elevenlabs.Config.display:GetBool() ) and text or ""
+        end
+
+        local msg = string.sub(text, 5)
+        if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
+            msg:sub(1,40)
+        end
+
+        msg = Elevenlabs.Config.StringSafe:GetBool() and Elevenlabs.SanitizeString(msg) or msg
+        Elevenlabs.Request(ply, msg)
+
+        return not ( Elevenlabs.Config.display:GetBool() ) and text or ""
+    end
+end)
+
+--[[------------------------
+           Network
+------------------------]]--
+
+net.Receive("Elevenlabs.Command", Elevenlabs.PlayerCommand)
+
+--[[------------------------
+          ConCommand
+------------------------]]--
+
+concommand.Add("elevenlabs_blacklist", function(_, _, str)
+    if string.StartsWith(str, "7656") or string.StartsWith(str, "STEAM_") then
+        local ply = NULL
+
+        ply = player.GetBySteamID(str)
+        ply = IsValid(ply) and ply or player.GetByAccountID(str)
+
+        Elevenlabs.BlacklistPlayer(ply, false)
+    end
+end)
+
+concommand.Add("elevenlabs_whitelist", function(_, _, str)
+    if string.StartsWith(str, "7656") or string.StartsWith(str, "STEAM_") then
+        local ply = NULL
+
+        ply = player.GetBySteamID(str)
+        ply = IsValid(ply) and ply or player.GetByAccountID(str)
+
+        Elevenlabs.BlacklistPlayer(ply, true)
+    end
+end)
