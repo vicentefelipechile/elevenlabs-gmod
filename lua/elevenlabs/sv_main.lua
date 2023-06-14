@@ -107,8 +107,9 @@ end
 
 function Elevenlabs.Request(ply, msg)
 
-    local voice = voices[ ply:GetInfo("elevenlabs_voice") ] or voice
+    if not Elevenlabs.Config.enabled:GetBool() then return end
 
+    local voice = voices[ ply:GetInfo("elevenlabs_voice") ] or ply:GetInfo("elevenlabs_voice") 
     local headers = {
         ["Accept"] = "audio/mpeg",
         ["Content-Type"] = "application/json",
@@ -202,8 +203,6 @@ end
 ------------------------]]--
 
 hook.Add("PlayerSay", "elevenlabssay", function(ply, text)
-    if not Elevenlabs.Config.enabled:GetBool() then return end
-
     if stringStart(text, "!tts ") then
 
         if Elevenlabs.IsBlacklistedPlayer(ply) then
