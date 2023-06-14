@@ -167,7 +167,6 @@ function Elevenlabs.Request(ply, msg)
                         Elevenlabs.Cache[FileID .. "_pos"] = FilePos
         
                         Elevenlabs.WriteData(ply, false, FileID, Elevenlabs.Cache[FileID][FilePos], FilePos, FileParts)
-                        print(ply, false, FileID, FilePos, FileParts)
                     end)
                 else
                     Elevenlabs.WriteData(ply, true, FileID, FileContent)
