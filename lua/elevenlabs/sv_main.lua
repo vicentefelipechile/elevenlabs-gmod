@@ -133,6 +133,7 @@ function Elevenlabs.Request(ply, msg)
         headers     = headers,
         type        = "application/json",
         success     = function(code, body, header)
+            Elevenlabs.GetStatusDescription(code)
 
             if code == 200 then
 
@@ -188,7 +189,6 @@ function Elevenlabs.PlayerCommand(_, ply)
         return not ( Elevenlabs.Config.display:GetBool() ) and text or ""
     end
 
-    local msg = string.sub(text, 5)
     if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
         msg:sub(1,40)
     end

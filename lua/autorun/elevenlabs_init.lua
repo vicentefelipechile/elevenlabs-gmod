@@ -1,6 +1,9 @@
 --[[----------------------------------------------------------------------------
                                 Elevenlabs
 ----------------------------------------------------------------------------]]--
+if SERVER then
+    AddCSLuaFile("enum_color.lua")
+end
 include("enum_color.lua")
 
 Elevenlabs = Elevenlabs or {}
@@ -40,5 +43,6 @@ function Elevenlabs.AddFile(path)
 end
 
 Elevenlabs.AddFile("sh_main.lua")
+Elevenlabs.AddFile("sh_http.lua")
 Elevenlabs.AddFile("cl_main.lua")
 Elevenlabs.AddFile("sv_main.lua")
