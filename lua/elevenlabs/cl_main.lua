@@ -12,7 +12,7 @@ CreateClientConVar("elevenlabs_download", 1, true, true, "Toggle to download voi
 function Elevenlabs.Request(msg)
 
     if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
-        msg:sub(1,40)
+        msg:sub(1, 40)
     end
 
     net.Start("Elevenlabs.Command")
@@ -32,7 +32,7 @@ function Elevenlabs.PlaySound(ply, path)
             g_sound:Play()
 
             hook.Add("Think", "elevenlabs_" .. soundID, function()
-                g_sound:SetPos( ply:GetPos() )
+                g_sound:SetPos( ply:GetPos() or LocalPlayer():GetPos() )
 
                 if g_sound:GetState() == GMOD_CHANNEL_STOPPED then
                     hook.Remove("Think", "elevenlabs_" .. soundID)

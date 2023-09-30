@@ -25,6 +25,18 @@ local voices = {
     ["sam"]     = "yoZ06aMxZJJ28mfd3POQ",
 }
 
+
+--[[------------------------
+      Global Definitions
+------------------------]]--
+
+Elevenlabs.Headers = {
+    ["Accept"] = "audio/mpeg",
+    ["Content-Type"] = "application/json",
+    ["xi-api-key"] = "YOUR_API_KEY_HERE"
+}
+
+
 --[[------------------------
      Private Definitions
 ------------------------]]--
@@ -40,28 +52,6 @@ Elevenlabs.Config.StringSafe = CreateConVar("elevenlabs_stringsafe", 0, {FCVAR_N
 --[[------------------------
         Main Functions
 ------------------------]]--
-
-function Elevenlabs.BlacklistPlayer(ply, allow)
-    if not IsEntity(ply) then return end
-    if not ply:IsPlayer() then return end
-    if not isbool(allow) then return end
-
-    -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L351-L356
-    local name = string.format( "%s[%s]", ply:SteamID(), "ElevenlabsBlacklisted" )
-    sql.Query( "REPLACE INTO playerpdata ( infoid, value ) VALUES ( " .. SQLStr( name ) .. ", " .. SQLStr( allow and "Allowed" or "NotAllowed" ) .. " )" )
-end
-
-function Elevenlabs.IsBlacklistedPlayer(ply)
-    -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L337-L345
-    name = string.format( "%s[%s]", ply:SteamID(), "ElevenlabsBlacklisted" )
-	local val = sql.QueryValue( "SELECT value FROM playerpdata WHERE infoid = " .. SQLStr( name ) .. " LIMIT 1" )
-
-	if ( val == nil ) then
-        return false
-    end
-
-	return val == "NotAllowed"
-end
 
 function Elevenlabs.GetPlayers()
     local tbl = {}
@@ -104,19 +94,15 @@ function Elevenlabs.WriteData(ply, IsOnePart, FileID, FileData, FileCurrentPart,
 
 end
 
-
 function Elevenlabs.Request(ply, msg)
 
     if not Elevenlabs.Config.enabled:GetBool() then return end
 
-    local voice = voices[ ply:GetInfo("elevenlabs_voice") ] or ply:GetInfo("elevenlabs_voice") 
-    local headers = {
-        ["Accept"] = "audio/mpeg",
-        ["Content-Type"] = "application/json",
-        ["xi-api-key"] = Elevenlabs.Config.Key:GetString()
-    }
+    local Voice = Voices[ ply:GetInfo("elevenlabs_voice") ] or ply:GetInfo("elevenlabs_voice") 
+    local Headers = table.Copy(Elevenlabs.Headers)
+    Headers["xi-api-key"] = Elevenlabs.Config.Key:GetString()
 
-    local body = {
+    local Body = {
         text = msg,
         model_id = Elevenlabs.Config.Multilingual:GetBool() and "eleven_multilingual_v1" or "eleven_monolingual_v1",
         voice_settings = {
@@ -125,13 +111,13 @@ function Elevenlabs.Request(ply, msg)
         }
     }
 
-    local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], voice )
+    local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], Voice )
     
     HTTP({
         url         = url,
         method      = "POST",
-        body        = util.TableToJSON(body),
-        headers     = headers,
+        body        = util.TableToJSON(Body),
+        headers     = Headers,
         type        = "application/json",
         success     = function(code, body, header)
             Elevenlabs.GetStatusDescription(code)
@@ -186,11 +172,11 @@ function Elevenlabs.PlayerCommand(_, ply)
 
     if Elevenlabs.IsBlacklistedPlayer(ply) then
         ply:ChatPrint( Elevenlabs.Config.NotAllowedMsg:GetString() )
-        return not ( Elevenlabs.Config.display:GetBool() ) and text or ""
+        return ( not Elevenlabs.Config.display:GetBool() ) and Elevenlabs.Config.NotAllowedMsg:GetString() or ""
     end
 
     if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
-        msg:sub(1,40)
+        msg:sub(1, 40)
     end
 
     msg = Elevenlabs.Config.StringSafe:GetBool() and Elevenlabs.SanitizeString(msg) or msg
@@ -211,7 +197,7 @@ hook.Add("PlayerSay", "elevenlabssay", function(ply, text)
 
         local msg = string.sub(text, 5)
         if msg:len() >= Elevenlabs.Config.maxtext:GetInt() then
-            msg:sub(1,40)
+            msg:sub(1, 40)
         end
 
         msg = Elevenlabs.Config.StringSafe:GetBool() and Elevenlabs.SanitizeString(msg) or msg
@@ -226,29 +212,3 @@ end)
 ------------------------]]--
 
 net.Receive("Elevenlabs.Command", Elevenlabs.PlayerCommand)
-
---[[------------------------
-          ConCommand
-------------------------]]--
-
-concommand.Add("elevenlabs_blacklist", function(_, _, str)
-    if stringStart(str, "7656") or stringStart(str, "STEAM_") then
-        local ply = NULL
-
-        ply = player.GetBySteamID(str)
-        ply = IsValid(ply) and ply or player.GetByAccountID(str)
-
-        Elevenlabs.BlacklistPlayer(ply, false)
-    end
-end)
-
-concommand.Add("elevenlabs_whitelist", function(_, _, str)
-    if stringStart(str, "7656") or stringStart(str, "STEAM_") then
-        local ply = NULL
-
-        ply = player.GetBySteamID(str)
-        ply = IsValid(ply) and ply or player.GetByAccountID(str)
-
-        Elevenlabs.BlacklistPlayer(ply, true)
-    end
-end)
