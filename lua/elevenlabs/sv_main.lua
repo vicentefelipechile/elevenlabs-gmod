@@ -13,7 +13,7 @@ Elevenlabs.Cache = {}
 ------------------------]]--
 
 local FileMaxSize = 63000
-local voices = {
+local Voices = {
     ["rachel"]  = "21m00Tcm4TlvDq8ikWAM",
     ["doni"]    = "AZnzlk1XvdvUeBnXmlld",
     ["bella"]   = "EXAVITQu4vr4xnSDxMaL",
@@ -72,7 +72,7 @@ function Elevenlabs.WriteData(ply, IsOnePart, FileID, FileData, FileCurrentPart,
         net.WriteBool(IsOnePart)
         net.WriteString(FileID)
         net.WriteEntity(ply)
-    
+
         if IsOnePart then
 
             net.WriteUInt(FileSize, 16)
@@ -98,7 +98,7 @@ function Elevenlabs.Request(ply, msg)
 
     if not Elevenlabs.Config.enabled:GetBool() then return end
 
-    local Voice = Voices[ ply:GetInfo("elevenlabs_voice") ] or ply:GetInfo("elevenlabs_voice") 
+    local Voice = Voices[ ply:GetInfo("elevenlabs_voice") ] or ply:GetInfo("elevenlabs_voice")
     local Headers = table.Copy(Elevenlabs.Headers)
     Headers["xi-api-key"] = Elevenlabs.Config.Key:GetString()
 
@@ -112,7 +112,7 @@ function Elevenlabs.Request(ply, msg)
     }
 
     local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], Voice )
-    
+
     HTTP({
         url         = url,
         method      = "POST",
@@ -151,7 +151,7 @@ function Elevenlabs.Request(ply, msg)
                     timer.Create("elevenlabs_send_" .. FileID, 1 / Elevenlabs.Config.Time:GetInt() or 20, #Elevenlabs.Cache[FileID], function()
                         local FilePos = Elevenlabs.Cache[FileID .. "_pos"] + 1
                         Elevenlabs.Cache[FileID .. "_pos"] = FilePos
-        
+
                         Elevenlabs.WriteData(ply, false, FileID, Elevenlabs.Cache[FileID][FilePos], FilePos, FileParts)
                     end)
                 else

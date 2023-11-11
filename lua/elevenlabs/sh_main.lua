@@ -29,16 +29,15 @@ Elevenlabs.Config.BadCharacters = {
 ------------------------]]--
 
 function Elevenlabs.SetFileName(name)
-    local unixtime = os.time()
-    local name = string.lower( name:gsub("[%p%c]", ""):gsub("%s+", "_") )
+    name = string.lower( name:gsub("[%p%c]", ""):gsub("%s+", "_") )
 
     if not file.Exists("elevenlabs", "DATA") then
         file.CreateDir("elevenlabs")
     end
 
     local format = "elevenlabs/%s_%s.mp3"
-    
-    return string.format(format, unixtime, name)
+
+    return string.format(format, os.time(), name)
 end
 
 
@@ -48,7 +47,7 @@ function Elevenlabs.SanitizeString(inputString)
     for i = 1, #inputString do
         local char = inputString:sub(i, i)
         local sanitizedChar = Elevenlabs.Config.BadCharacters[char]
-        
+
         sanitizedString = sanitizedChar and ( sanitizedString .. sanitizedChar ) or ( sanitizedString .. char )
     end
 
@@ -69,13 +68,13 @@ end
 -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L337-L345
 function Elevenlabs.IsBlacklistedPlayer(ply)
     local name = string.format( "%s[%s]", ply:SteamID(), "ElevenlabsBlacklisted" )
-	local val = sql.QueryValue( "SELECT value FROM playerpdata WHERE infoid = " .. SQLStr( name ) .. " LIMIT 1" )
+    local val = sql.QueryValue( "SELECT value FROM playerpdata WHERE infoid = " .. SQLStr( name ) .. " LIMIT 1" )
 
-	if ( val == nil ) then
+    if ( val == nil ) then
         return false
     end
 
-	return val == "NotAllowed"
+    return val == "NotAllowed"
 end
 
 --[[------------------------
@@ -85,10 +84,10 @@ if SERVER then
     net.Receive("Elevenlabs.BlackList", function(_, ply)
         if not ply:IsSuperAdmin() then return end
 
-        local ply = net.ReadEntity()
+        local plyTarget = net.ReadEntity()
         local allow = net.ReadBool()
 
-        Elevenlabs.BlacklistPlayer(ply, allow)
+        Elevenlabs.BlacklistPlayer(plyTarget, allow)
     end)
 end
 
@@ -100,18 +99,18 @@ concommand.Add("elevenlabs_blacklist", function(ply, cmd, str)
     if not ( SERVER or ply:IsSuperAdmin() ) then return end
 
     if stringStart(str, "7656") or stringStart(str, "STEAM_") then
-        local ply = NULL
+        local plyTarget = NULL
 
-        ply = player.GetBySteamID(str)
-        ply = IsValid(ply) and ply or player.GetByAccountID(str)
+        plyTarget = player.GetBySteamID(str)
+        plyTarget = IsValid(plyTarget) and plyTarget or player.GetByAccountID(str)
 
         if CLIENT then
             net.Start("Elevenlabs.BlackList")
-                net.WriteEntity(ply)
+                net.WriteEntity(plyTarget)
                 net.WriteBool(false)
             net.SendToServer()
         else
-            Elevenlabs.BlacklistPlayer(ply, false)
+            Elevenlabs.BlacklistPlayer(plyTarget, false)
         end
     end
 end)
@@ -120,18 +119,18 @@ concommand.Add("elevenlabs_whitelist", function(ply, cmd, str)
     if not ( SERVER or ply:IsSuperAdmin() ) then return end
 
     if stringStart(str, "7656") or stringStart(str, "STEAM_") then
-        local ply = NULL
+        local plyTarget = NULL
 
-        ply = player.GetBySteamID(str)
-        ply = IsValid(ply) and ply or player.GetByAccountID(str)
+        plyTarget = player.GetBySteamID(str)
+        plyTarget = IsValid(ply) and ply or player.GetByAccountID(str)
 
         if CLIENT then
             net.Start("Elevenlabs.BlackList")
-                net.WriteEntity(ply)
+                net.WriteEntity(plyTarget)
                 net.WriteBool(true)
             net.SendToServer()
         else
-            Elevenlabs.BlacklistPlayer(ply, true)
+            Elevenlabs.BlacklistPlayer(plyTarget, true)
         end
     end
 end)
